@@ -3,6 +3,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLOutput;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +74,7 @@ public class MentorFinder {
 
   }
 
-  public void change_status_declined(Connection con, int request_id) throws SQLException {
+  public void change_status_declined(Connection con, int request_id, String mentor) throws SQLException {
     // select statement for showing
     Statement stmt = null;
 
@@ -81,9 +82,15 @@ public class MentorFinder {
     try {
 
       String sql = "UPDATE request_status SET status = \"DECLINED\" WHERE request_id = "
-              + request_id + ";";
+              + request_id +" AND " +  "mentor_id = \'" + mentor + "\';";
       stmt = con.createStatement();
       int update = stmt.executeUpdate(sql);
+      if(update == 0) {
+        System.out.println("This request cannot be approved!");
+      }
+      else {
+        System.out.println("Request ID " + request_id + " DECLINED! ");
+      }
 
     } catch (SQLException SQLe) {
       System.out.println(SQLe.getMessage());
@@ -93,43 +100,53 @@ public class MentorFinder {
 
   }
 
-  public void change_status_approved(Connection con, int request_id) throws SQLException {
+  public void change_status_approved(Connection con, int request_id, String mentor) throws SQLException {
     // select statement for showing
     Statement stmt = null;
-
 
     // Retrieve list of mentees under the mentor
     try {
 
       String sql = "UPDATE request_status SET status = \"APPROVED\" WHERE request_id = "
-              + request_id + ";";
+              + request_id + " AND " +  "mentor_id = \'" + mentor + "\';";
       stmt = con.createStatement();
       int update = stmt.executeUpdate(sql);
+      //System.out.println(update);
+      if(update == 1) {
+        System.out.println("Request ID " + request_id + " APPROVED! ");
+      }
+      if(update == 0) {
+        System.out.println("This request cannot be approved!");
+      }
 
     } catch (SQLException SQLe) {
+     // System.out.println("here");
       System.out.println(SQLe.getMessage());
+
     }
+
 
     stmt.close();
 
   }
 
 
-  public void delete_req_from_pending(Connection con, int request_id) throws SQLException {
+  public void delete_req_from_pending(Connection con, int request_id, String mentor) throws SQLException {
     // select statement for showing
     Statement stmt = null;
-
 
     // Retrieve list of mentees under the mentor
     try {
 
       String sql = "DELETE FROM pending_requests WHERE request_id = "
-              + request_id + ";";
+              + request_id +" AND " +  "mentor_id = \'" + mentor + "\';";
       stmt = con.createStatement();
       int delete = stmt.executeUpdate(sql);
 
     } catch (SQLException SQLe) {
+      //System.out.println("b");
       System.out.println(SQLe.getMessage());
+
     }
 
     stmt.close();
@@ -166,68 +183,155 @@ public class MentorFinder {
     stmt.close();
     rs.close();
 
-    // give option to accept or decline
-    System.out.println("Please type the request IDs you want to accept." +
-            "\nType -1 to stop.");
+    int approve_reqs = 0;
 
-    int approve_reqs = sc.nextInt();
     while (approve_reqs != -1) {
+      // give option to accept or decline
+      System.out.println("Please type the request IDs you want to ACCEPT." +
+              "\nType -1 to stop.");
+      String approve =  sc.nextLine();
 
-      // make change in the status table to approved ->
-      change_status_approved(con, approve_reqs);
-      System.out.println("Request ID " + approve_reqs + " APPROVED!");
-      delete_req_from_pending(con, approve_reqs);
+      try {
+        approve_reqs = Integer.parseInt(approve);
+        if(approve_reqs == -1){
+          break;
+        }
+        // make change in the status table to approved ->
+        change_status_approved(con, approve_reqs, mentor);
 
-      approve_reqs = sc.nextInt();
+        delete_req_from_pending(con, approve_reqs, mentor);
+      }
+      catch (NumberFormatException e) {
+        System.out.println("Invalid Input. Try again");
+        continue;
+      }
+
+
     }
 
-    System.out.println("Please type the request IDs you want to accept." +
-            "\nType -1 to stop.");
 
-    int decline_reqs = sc.nextInt();
+    int decline_reqs = 0;
     while (decline_reqs != -1) {
+      System.out.println("Please type the request IDs you want to DECLINE." +
+              "\nType -1 to stop.");
 
-      System.out.println("Request ID" + decline_reqs + "DECLINED!");
-      // make change in the status table to DECLINED ->
-      change_status_declined(con, decline_reqs);
-      delete_req_from_pending(con, approve_reqs);
+      String decline = sc.nextLine();
 
-      decline_reqs = sc.nextInt();
+      try {
+        decline_reqs = Integer.parseInt(decline);
+        if(decline_reqs == -1){
+          break;
+        }
+        // make change in the status table to approved ->
+        change_status_declined(con, approve_reqs, mentor);
+
+        delete_req_from_pending(con, approve_reqs, mentor);
+      }
+      catch (NumberFormatException e) {
+        System.out.println("Invalid Input. Try again");
+        continue;
+      }
+
     }
 
   }
 
+  public boolean mentor_is_registered(Connection conn, String userID) throws SQLException {
+    String command = "Select * FROM mentors where mentor_id = '" + userID + "'";
+    Statement st = conn.createStatement();
+    ResultSet rs = st.executeQuery(command);
+    return rs.next();
+
+  }
+/*
+  public void register_mentor(Connection conn, String mentor) throws SQLException {
+    //Scanner sc = new Scanner(System.in);
+    System.out.println("Please enter your first name.");
+    String firstName = sc.nextLine();
+
+    System.out.println("Please enter your last name.");
+    String lastName = sc.nextLine();
+
+    System.out.println("Please enter your country.");
+    String country_string = sc.nextLine();
+    int country = find_country_id(conn, country_string);
+
+    System.out.println("Please enter your ethnicity.");
+    String ethnicitiy = sc.nextLine();
+    int ethnicity = find_ethnicity_id(con, ethnicitiy );
+
+    System.out.println("Please enter your gender identity.");
+    String gender = sc.nextLine();
+
+    System.out.println("Please enter your degree and level(Bachelor/ Master/ PostDoc.");
+    String degree = sc.nextLine();
+
+    int ethnicity = find_ethnicity_id(con, ethnicitiy );
+
+    System.out.println("Please enter your linkedin");
+    String linkedin = sc.nextLine();
+
+    System.out.println("Please enter your field");
+    String field_string = sc.nextLine();
+    int field = find_field_id(conn, field_string);
+
+    String command = "INSERT INTO mentee (user_id, first_name, last_name, age, country_id, email, linkedIn, field_id) \n" +
+            "VALUES ( ?,?,?,?,?,?,?,?)";
+
+    PreparedStatement st = conn.prepareStatement(command);
+    st.setString(1, userID);
+    st.setString(2, firstName);
+    st.setString(3, lastName);
+    st.setInt(4, age);
+    st.setInt(5, country);
+    st.setString(6, email);
+    st.setString(7, linkedin);
+    st.setInt(8, field);
+
+    int add = st.executeUpdate();
+
+    System.out.println("Great! You are now registered.");
+  }
+  */
+
+
   public void user_mentor(Connection con) throws SQLException {
 
-    Scanner sc = new Scanner(System.in);
-    System.out.println("Welcome to the Mentorship Portal! " +
+    //Scanner sc = new Scanner(System.in);
+    System.out.println("\n\nWelcome to the Mentorship Portal! " +
             "\nPlease enter your userID ");
     String mentor = sc.nextLine();
-    System.out.println("Select the wanted search from the given list of options below- ");
-    System.out.println("A : Show current mentees. \nB : Show mentorship requests \nQ: Quit ");
 
-    boolean invalid_input = true;
-    String option = sc.nextLine();
+    // check if mentor is not registered
+    boolean registered = mentor_is_registered(con, mentor);
 
-    while (!option.equalsIgnoreCase("a") && !option.equalsIgnoreCase("b")
-            && !option.equalsIgnoreCase("q")) {
-      System.out.println("Invlaid input! Enter again." +
-              "\nA : Show current mentees. \nB : Show mentorship requests \nQ: Quit ");
-      option = sc.nextLine();
+    if(!registered) {
+      System.out.println("Looks like you are not a registered user!" +
+              " Exiting from system.");
     }
+    else {
+      System.out.println("Select the wanted search from the given list of options below- ");
+      System.out.println("A : Show current mentees. \nB : Show mentorship requests \nQ: Quit ");
+
+      boolean invalid_input = true;
+      String option = sc.nextLine();
+
+      while (!option.equalsIgnoreCase("a") && !option.equalsIgnoreCase("b")
+              && !option.equalsIgnoreCase("q")) {
+        System.out.println("Invalid input! Enter again." +
+                "\nA : Show current mentees. \nB : Show mentorship requests \nQ: Quit ");
+        option = sc.nextLine();
+      }
 
 
-    if (option.equalsIgnoreCase("A")) {
-      this.show_current_mentees(con, mentor);
-    } else if (option.equalsIgnoreCase("B")) {
-      this.show_requests(con, mentor);
-    } else if (option.equalsIgnoreCase("Q")) {
-      // quit
+      if (option.equalsIgnoreCase("A")) {
+        this.show_current_mentees(con, mentor);
+      } else if (option.equalsIgnoreCase("B")) {
+        this.show_requests(con, mentor);
+      } else if (option.equalsIgnoreCase("Q")) {
+        // quits
+      }
     }
-
-
-
-
   }
 
   public Integer printCountries(Connection conn) throws SQLException {
@@ -247,21 +351,19 @@ public class MentorFinder {
 
 
     System.out.println("Which country would you like to select? Type the id number.");
-    Scanner sc = new Scanner(System.in);
+    // Scanner sc = new Scanner(System.in);
     String option = sc.nextLine();
 
-    while ( !country_ids.contains( option)){
+    while (!country_ids.contains(option)) {
       System.out.println("Sorry, that is not a valid choice. Please enter a valid answer" +
               "\nWhich country would you like to select? Type the id number.");
       option = sc.nextLine();
     }
 
 
-      return Integer.valueOf(option);
-
-
-
+    return Integer.valueOf(option);
   }
+
   public Integer printOrganizations(Connection conn) throws SQLException {
     List<String> organization_ids = new ArrayList<>();
     String command = "Select organization.* FROM organization INNER JOIN mentors ON organization.current_organization_id = mentors.current_organization_id";
@@ -278,26 +380,23 @@ public class MentorFinder {
     }
 
     System.out.println("Which country would you like to select? Type the id number.");
-    Scanner sc = new Scanner(System.in);
+    //Scanner sc = new Scanner(System.in);
     String option = sc.nextLine();
 
-    while (!organization_ids.contains( option) ){
+    while (!organization_ids.contains(option)) {
       System.out.println("Sorry, that is not a valid choice. Please enter a valid answer" +
               "\nWhich organization would you like to select? Type the id number.");
       option = sc.nextLine();
     }
-
-
-      return Integer.valueOf(option);
-
-
+    return Integer.valueOf(option);
   }
+
   public Integer printEthnicities(Connection conn) throws SQLException {
     List<String> ethnicity_ids = new ArrayList<>();
     String command = "Select ethnicity.* FROM ethnicity INNER JOIN mentors ON ethnicity.ethnicity_id = mentors.ethnicity_id";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
-    System.out.println("Ethniticies:");
+    System.out.println("Ethnicities:");
 
     while (rs.next()) {
       String out = String.format("%d %s",
@@ -307,18 +406,16 @@ public class MentorFinder {
       System.out.println(out);
     }
     System.out.println("Which ethnicity would you like to select? Type the id number.");
-    Scanner sc = new Scanner(System.in);
+    //Scanner sc = new Scanner(System.in);
     String option = sc.nextLine();
 
-    while (!ethnicity_ids.contains( option) ){
+    while (!ethnicity_ids.contains(option)) {
       System.out.println("Sorry, that is not a valid choice. Please enter a valid answer" +
               "\nWhich organization would you like to select? Type the id number.");
       option = sc.nextLine();
     }
 
-
     return Integer.valueOf(option);
-
   }
 
   public Integer printFields(Connection conn) throws SQLException {
@@ -336,19 +433,19 @@ public class MentorFinder {
       System.out.println(out);
     }
     System.out.println("Which field would you like to select? Type the id number.");
-    Scanner sc = new Scanner(System.in);
+    //Scanner sc = new Scanner(System.in);
     String option = sc.nextLine();
 
-    while (!field_ids.contains( option) ){
+    while (!field_ids.contains(option)) {
       System.out.println("Sorry, that is not a valid choice. Please enter a valid answer" +
               "\nWhich organization would you like to select? Type the id number.");
       option = sc.nextLine();
     }
 
-
     return Integer.valueOf(option);
 
   }
+
   public Integer printDegrees(Connection conn) throws SQLException {
     List<String> degree_ids = new ArrayList<>();
     String command = "Select degree.* FROM degree INNER JOIN mentors ON degree.degree_id = mentors.degree_id";
@@ -365,18 +462,15 @@ public class MentorFinder {
       System.out.println(out);
     }
     System.out.println("Which degree would you like to select? Type the id number.");
-    Scanner sc = new Scanner(System.in);
+    //Scanner sc = new Scanner(System.in);
     String option = sc.nextLine();
 
-    while (!degree_ids.contains( option) ){
+    while (!degree_ids.contains(option)) {
       System.out.println("Sorry, that is not a valid choice. Please enter a valid answer" +
               "\nWhich organization would you like to select? Type the id number.");
       option = sc.nextLine();
     }
-
-
     return Integer.valueOf(option);
-
   }
 
   public String country_mentors(Connection conn, Integer countryID) throws SQLException {
@@ -400,7 +494,7 @@ public class MentorFinder {
               rs.getString(11)
 
       );
-      String [] words = out.split(" ");
+      String[] words = out.split(" ");
 
       // add the mentor to list of available mentors
       country_mentors_ids.add(words[0]);
@@ -408,8 +502,8 @@ public class MentorFinder {
       System.out.println(out);
     }
     System.out.println("Which mentor would you like to message? Please enter their userID.");
-    Scanner sc = new Scanner(System.in);
-    String mentor= sc.nextLine();
+    //Scanner sc = new Scanner(System.in);
+    String mentor = sc.nextLine();
 
     while (!country_mentors_ids.contains(mentor)) {
       System.out.println("Sorry, that is not a valid choice. Please enter a valid answer" +
@@ -418,7 +512,6 @@ public class MentorFinder {
     }
     return mentor;
   }
-
 
 
   public String organization_mentors(Connection conn, Integer currentOrganizationID) throws SQLException {
@@ -441,15 +534,15 @@ public class MentorFinder {
               rs.getString(10),
               rs.getString(11)
       );
-      String [] words = out.split(" ");
+      String[] words = out.split(" ");
 
       // add the mentor to list of available mentors
       org_mentors_ids.add(words[0]);
       System.out.println(out);
     }
     System.out.println("Which mentor would you like to message? Please enter their userID.");
-    Scanner sc = new Scanner(System.in);
-    String mentor= sc.nextLine();
+    //Scanner sc = new Scanner(System.in);
+    String mentor = sc.nextLine();
 
     while (!org_mentors_ids.contains(mentor)) {
       System.out.println("Sorry, that is not a valid choice. Please enter a valid answer" +
@@ -480,7 +573,7 @@ public class MentorFinder {
               rs.getString(10),
               rs.getString(11)
       );
-      String [] words = out.split(" ");
+      String[] words = out.split(" ");
 
       // add the mentor to list of available mentors
       ethnicity_mentors_ids.add(words[0]);
@@ -488,7 +581,7 @@ public class MentorFinder {
     }
     System.out.println("Which mentor would you like to message? Please enter their userID.");
     Scanner sc = new Scanner(System.in);
-    String mentor= sc.nextLine();
+    String mentor = sc.nextLine();
 
     while (!ethnicity_mentors_ids.contains(mentor)) {
       System.out.println("Sorry, that is not a valid choice. Please enter a valid answer" +
@@ -497,7 +590,6 @@ public class MentorFinder {
     }
     return mentor;
   }
-
 
 
   public String field_mentors(Connection conn, Integer fieldID) throws SQLException {
@@ -520,15 +612,15 @@ public class MentorFinder {
               rs.getString(10),
               rs.getString(11)
       );
-      String [] words = out.split(" ");
+      String[] words = out.split(" ");
 
       // add the mentor to list of available mentors
       field_mentors_ids.add(words[0]);
       System.out.println(out);
     }
     System.out.println("Which mentor would you like to message? Please enter their userID.");
-    Scanner sc = new Scanner(System.in);
-    String mentor= sc.nextLine();
+    //Scanner sc = new Scanner(System.in);
+    String mentor = sc.nextLine();
 
     while (!field_mentors_ids.contains(mentor)) {
       System.out.println("Sorry, that is not a valid choice. Please enter a valid answer" +
@@ -558,15 +650,15 @@ public class MentorFinder {
               rs.getString(10),
               rs.getString(11)
       );
-      String [] words = out.split(" ");
+      String[] words = out.split(" ");
 
       // add the mentor to list of available mentors
       degree_mentors_ids.add(words[0]);
       System.out.println(out);
     }
     System.out.println("Which mentor would you like to message? Please enter their userID.");
-    Scanner sc = new Scanner(System.in);
-    String mentor= sc.nextLine();
+   // Scanner sc = new Scanner(System.in);
+    String mentor = sc.nextLine();
 
     while (!degree_mentors_ids.contains(mentor)) {
       System.out.println("Sorry, that is not a valid choice. Please enter a valid answer" +
@@ -577,7 +669,7 @@ public class MentorFinder {
   }
 
   public boolean is_registered(Connection conn, String userID) throws SQLException {
-    String command = "Select * FROM mentee where user_id = '" + userID + "'" ;
+    String command = "Select * FROM mentee where user_id = '" + userID + "'";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
     return rs.next();
@@ -585,18 +677,18 @@ public class MentorFinder {
   }
 
   public Integer find_country_id(Connection conn, String country) throws SQLException {
-    String command = "Select country_id FROM country where name = '" + country + "'" ;
+    String command = "Select country_id FROM country where name = '" + country + "'";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
     rs.next();
-   int country_id = rs.getInt(1);
+    int country_id = rs.getInt(1);
 
     return country_id;
 
   }
 
   public Integer find_field_id(Connection conn, String field) throws SQLException {
-    String command = "Select field_id FROM stem_field where field_name = '" + field + "'" ;
+    String command = "Select field_id FROM stem_field where field_name = '" + field + "'";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
     rs.next();
@@ -608,7 +700,7 @@ public class MentorFinder {
   }
 
   public void register_mentee(Connection conn, String userID) throws SQLException {
-    Scanner sc = new Scanner(System.in);
+    //Scanner sc = new Scanner(System.in);
     System.out.println("Please enter your first name");
     String firstName = sc.nextLine();
 
@@ -617,7 +709,7 @@ public class MentorFinder {
 
     System.out.println("Please enter your age");
     String age_string = sc.nextLine();
-    int age =Integer.parseInt(age_string);
+    int age = Integer.parseInt(age_string);
 
     System.out.println("Please enter your country");
     String country_string = sc.nextLine();
@@ -631,20 +723,20 @@ public class MentorFinder {
 
     System.out.println("Please enter your field");
     String field_string = sc.nextLine();
-    int field = find_field_id(conn,field_string);
+    int field = find_field_id(conn, field_string);
 
     String command = "INSERT INTO mentee (user_id, first_name, last_name, age, country_id, email, linkedIn, field_id) \n" +
-            "VALUES ( ?,?,?,?,?,?,?,?)" ;
+            "VALUES ( ?,?,?,?,?,?,?,?)";
 
     PreparedStatement st = conn.prepareStatement(command);
-    st.setString(1,userID);
-    st.setString(2,firstName);
-    st.setString(3,lastName);
+    st.setString(1, userID);
+    st.setString(2, firstName);
+    st.setString(3, lastName);
     st.setInt(4, age);
-    st.setInt(5,country);
-    st.setString(6,email);
-    st.setString(7,linkedin);
-    st.setInt(8,field);
+    st.setInt(5, country);
+    st.setString(6, email);
+    st.setString(7, linkedin);
+    st.setInt(8, field);
 
     int add = st.executeUpdate();
 
@@ -653,7 +745,7 @@ public class MentorFinder {
   }
 
   public Integer find_request_id(Connection conn, String mentor, String mentee) throws SQLException {
-    String command = "Select request_id FROM request_status where mentor_id = '" + mentor + "' and mentee_id = '" + mentee + "'" ;
+    String command = "Select request_id FROM request_status where mentor_id = '" + mentor + "' and mentee_id = '" + mentee + "'";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
     rs.next();
@@ -662,30 +754,30 @@ public class MentorFinder {
 
   }
 
-  public void message_mentor(Connection conn, String mentorID, String menteeID){
-    Scanner sc = new Scanner(System.in);
+  public void message_mentor(Connection conn, String mentorID, String menteeID) {
+   // Scanner sc = new Scanner(System.in);
     System.out.println("What would you like to message this mentor?");
-    String messsage = sc.nextLine();
+    String message = sc.nextLine();
 
     try {
       String command = "INSERT INTO request_status(mentor_id, mentee_id) \n" +
-              "VALUES(?,?)" ;
+              "VALUES(?,?)";
 
       PreparedStatement st = conn.prepareStatement(command);
-      st.setString(1,mentorID);
-      st.setString(2,menteeID);
+      st.setString(1, mentorID);
+      st.setString(2, menteeID);
 
       int add = st.executeUpdate();
       int request_id = this.find_request_id(conn, mentorID, menteeID);
 
       String command2 = "INSERT INTO pending_requests(request_id,mentor_id, mentee_id, message_to_mentor) \n" +
-              "VALUES(?,?,?,?)" ;
+              "VALUES(?,?,?,?)";
 
       PreparedStatement st2 = conn.prepareStatement(command2);
-      st2.setInt(1,request_id);
-      st2.setString(2,mentorID);
-      st2.setString(3,menteeID);
-      st2.setString(4,messsage);
+      st2.setInt(1, request_id);
+      st2.setString(2, mentorID);
+      st2.setString(3, menteeID);
+      st2.setString(4, message);
 
       int add2 = st2.executeUpdate();
 
@@ -693,7 +785,6 @@ public class MentorFinder {
       System.out.println(SQLe.getMessage());
     }
     System.out.println("Message was sent!");
-
 
   }
 
@@ -713,7 +804,6 @@ public class MentorFinder {
       option = sc.nextLine();
     }
 
-
     // options
     String mentor = null;
     if (option.equalsIgnoreCase("A")) {
@@ -721,16 +811,16 @@ public class MentorFinder {
       mentor = this.country_mentors(con, id);
     } else if (option.equalsIgnoreCase("B")) {
       int id = this.printOrganizations(con);
-      mentor = this.organization_mentors(con,id);
+      mentor = this.organization_mentors(con, id);
     } else if (option.equalsIgnoreCase("C")) {
       int id = this.printEthnicities(con);
-      mentor = this.ethnicity_mentors(con,id);
+      mentor = this.ethnicity_mentors(con, id);
     } else if (option.equalsIgnoreCase("D")) {
       int id = this.printFields(con);
       mentor = this.field_mentors(con, id);
     } else if (option.equalsIgnoreCase("E")) {
       int id = this.printDegrees(con);
-      mentor = this.degree_mentors(con,id);
+      mentor = this.degree_mentors(con, id);
     } else if (option.equalsIgnoreCase("Q")) {
       return;
     }
@@ -740,7 +830,7 @@ public class MentorFinder {
   }
 
   public void check_requests(Connection conn, String mentee) throws SQLException {
-    String command = "Select * FROM request_status where mentee_id = '" + mentee +"'";
+    String command = "Select * FROM request_status where mentee_id = '" + mentee + "'";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
 
@@ -750,7 +840,6 @@ public class MentorFinder {
       String out = String.format("%-20d %-20s %-20s",
               rs.getInt(1),
               rs.getString(2),
-
               rs.getString(4)
       );
 
@@ -759,9 +848,9 @@ public class MentorFinder {
   }
 
 
-
+  // MENTEE INTERFACE
   public void user_mentee(Connection con) throws SQLException {
-    Scanner sc = new Scanner(System.in);
+    //Scanner sc = new Scanner(System.in);
     System.out.println("Welcome to the Mentee Portal! " +
             "\nPlease enter your userID ");
     String mentee = sc.nextLine();
@@ -782,32 +871,27 @@ public class MentorFinder {
 
       //search for mentors
       if (choice.equalsIgnoreCase("A")) {
-        this.search_mentors(con,mentee);
+        this.search_mentors(con, mentee);
       }
       // check history of requests
       else if (choice.equalsIgnoreCase("B")) {
-        this.check_requests(con,mentee);
+        this.check_requests(con, mentee);
       }
       //leave
       else if (choice.equalsIgnoreCase("C")) {
         System.out.println("Are you sure you would like to log out? Enter YES or NO");
         String confirm = sc.nextLine();
-        if (confirm.equalsIgnoreCase("YES")){
+        if (confirm.equalsIgnoreCase("YES")) {
           break;
         }
-      }
-      else {
+      } else {
         System.out.println("Please enter a valid choice");
       }
 
     }
-    System.out.println("You have successfully logged out.");
-    con.close();
   }
 
   public static void main(String[] args) throws SQLException {
-
-    // Question 1
     // Create a Scanner object for inputs
     Scanner sc = new Scanner(System.in);
 
@@ -837,14 +921,19 @@ public class MentorFinder {
     // if mentor
     if (user.equalsIgnoreCase("A")) {
       obj.user_mentor(con);
-    } else {
+    }
+    // if mentee
+    else if (user.equalsIgnoreCase("B")) {
       obj.user_mentee(con);
-
-
+    }
+    // invalid case
+    else {
+      System.out.println("Invalid Option!");
     }
 
     // close connection
     con.close();
+    System.out.println("You have successfully logged out.");
 
   }
 }

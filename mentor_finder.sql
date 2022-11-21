@@ -442,7 +442,7 @@ VALUES ( "Mariah03", "Mariah", "Maynard", 23, 185, "abc@gmail.com", "https://www
 
 INSERT INTO request_status(request_id, mentor_id, mentee_id,status ) 
 VALUES(1, "alexa03", "Mariah03", "PENDING"),
-(2, "sabu8796!!", "Mariah03", "PENDING!"),
+(2, "sabu8796!!", "Mariah03", "PENDING"),
 (3, "alexa03", "doedoe33", "PENDING"),
 (4, "arshi20!", "Smlaur2", "PENDING"),
 (5, "arshi20!", "panSar900", "PENDING"),

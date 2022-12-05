@@ -1,8 +1,5 @@
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.InputStream;
+import com.mysql.cj.jdbc.result.ResultSetMetaData;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -57,7 +54,8 @@ public class MentorFinder {
 
     // Retrieve list of mentees under the mentor
     try {
-      String sql = "CALL show_current_mentees(\"" + mentor + "\");" ;
+      String sql = "SELECT * FROM mentorship WHERE mentor_id = \'" +
+              mentor + "\' ;";
       stmt = con.createStatement();
       rs = stmt.executeQuery(sql);
       while (rs.next()) {
@@ -85,8 +83,8 @@ public class MentorFinder {
     // Retrieve list of mentees under the mentor
     try {
 
-      String sql = "CALL change_status_declined("
-              + request_id +", \' "  + mentor + "\');";
+      String sql = "UPDATE request_status SET status = \"DECLINED\" WHERE request_id = "
+              + request_id +" AND " +  "mentor_id = \'" + mentor + "\';";
       stmt = con.createStatement();
       int update = stmt.executeUpdate(sql);
       if(update == 0) {
@@ -111,8 +109,8 @@ public class MentorFinder {
     // Retrieve list of mentees under the mentor
     try {
 
-      String sql = "CALL change_status_declined("
-              + request_id +", \' "  + mentor + "\');";
+      String sql = "UPDATE request_status SET status = \"APPROVED\" WHERE request_id = "
+              + request_id + " AND " +  "mentor_id = \'" + mentor + "\';";
       stmt = con.createStatement();
       int update = stmt.executeUpdate(sql);
       //System.out.println(update);
@@ -129,7 +127,6 @@ public class MentorFinder {
 
     }
 
-
     stmt.close();
 
   }
@@ -142,8 +139,8 @@ public class MentorFinder {
     // Retrieve list of mentees under the mentor
     try {
 
-      String sql = "CALL delete_req_from_pending( "
-              + request_id +", \' "  + mentor + "\');";
+      String sql = "DELETE FROM pending_requests WHERE request_id = "
+              + request_id +" AND " +  "mentor_id = \'" + mentor + "\';";
       stmt = con.createStatement();
       int delete = stmt.executeUpdate(sql);
 
@@ -167,7 +164,7 @@ public class MentorFinder {
     // Retrieve list of mentees under the mentor
     try {
       // MAKE A NEW TABLE FOR PENDING REQUESTS??? GIVE request ID
-      String sql = "CALL show_requests( \'" + mentor + "\');";
+      String sql = "SELECT * FROM pending_requests WHERE mentor_id = \'" + mentor + "\';";
       stmt = con.createStatement();
       rs = stmt.executeQuery(sql);
       while (rs.next()) {
@@ -241,7 +238,7 @@ public class MentorFinder {
   }
 
   public boolean mentor_is_registered(Connection conn, String userID) throws SQLException {
-    String command = "CALL mentor_is_registered(\'" + userID + "\');";
+    String command = "Select * FROM mentors where mentor_id = '" + userID + "'";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
     return rs.next();
@@ -340,16 +337,25 @@ public class MentorFinder {
 
   public Integer printCountries(Connection conn) throws SQLException {
     List<String> country_ids = new ArrayList<>();
-    String command = "CALL printCountries();";
+    String command = "SELECT DISTINCT country.* FROM country INNER JOIN mentors ON country.country_id = mentors.country_id";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
+
+
+
     System.out.println("Countries:");
 
     while (rs.next()) {
+
       String out = String.format("%d %s",
               rs.getInt(1),
               rs.getString(2));
-      country_ids.add(String.valueOf(out.charAt(0)));
+      String[] words = out.split(" ");
+
+      // add the mentor to list of available mentors
+      country_ids.add(words[0]);
+
+
       System.out.println(out);
     }
 
@@ -370,7 +376,7 @@ public class MentorFinder {
 
   public Integer printOrganizations(Connection conn) throws SQLException {
     List<String> organization_ids = new ArrayList<>();
-    String command = "CALL printOrganizations(); ";
+    String command = "Select organization.* FROM organization INNER JOIN mentors ON organization.current_organization_id = mentors.current_organization_id";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
     System.out.println("Organizations:");
@@ -379,7 +385,12 @@ public class MentorFinder {
       String out = String.format("%d %s",
               rs.getInt(1),
               rs.getString(2));
-      organization_ids.add(String.valueOf(out.charAt(0)));
+      String[] words = out.split(" ");
+
+      // add the mentor to list of available mentors
+      organization_ids.add(words[0]);
+
+
       System.out.println(out);
     }
 
@@ -397,7 +408,7 @@ public class MentorFinder {
 
   public Integer printEthnicities(Connection conn) throws SQLException {
     List<String> ethnicity_ids = new ArrayList<>();
-    String command = "CALL printEthnicities(); ";
+    String command = "Select ethnicity.* FROM ethnicity INNER JOIN mentors ON ethnicity.ethnicity_id = mentors.ethnicity_id";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
     System.out.println("Ethnicities:");
@@ -406,7 +417,10 @@ public class MentorFinder {
       String out = String.format("%d %s",
               rs.getInt(1),
               rs.getString(2));
-      ethnicity_ids.add(String.valueOf(out.charAt(0)));
+      String[] words = out.split(" ");
+
+      // add the mentor to list of available mentors
+      ethnicity_ids.add(words[0]);
       System.out.println(out);
     }
     System.out.println("Which ethnicity would you like to select? Type the id number.");
@@ -424,16 +438,19 @@ public class MentorFinder {
 
   public Integer printFields(Connection conn) throws SQLException {
     List<String> field_ids = new ArrayList<>();
-    String command = "CALL printFields();";
+    String command = "Select stem_field.* FROM stem_field INNER JOIN mentors ON stem_field.field_id = mentors.field_id";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
-    System.out.println("Ethnicities:");
+    System.out.println("Ethniticies:");
 
     while (rs.next()) {
       String out = String.format("%d %s",
               rs.getInt(1),
               rs.getString(2));
-      field_ids.add(String.valueOf(out.charAt(0)));
+      String[] words = out.split(" ");
+
+      // add the mentor to list of available mentors
+      field_ids.add(words[0]);
       System.out.println(out);
     }
     System.out.println("Which field would you like to select? Type the id number.");
@@ -452,7 +469,7 @@ public class MentorFinder {
 
   public Integer printDegrees(Connection conn) throws SQLException {
     List<String> degree_ids = new ArrayList<>();
-    String command = "CALL printDegrees();";
+    String command = "Select degree.* FROM degree INNER JOIN mentors ON degree.degree_id = mentors.degree_id";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
     System.out.println("Degrees:");
@@ -462,7 +479,10 @@ public class MentorFinder {
               rs.getInt(1),
               rs.getString(2),
               rs.getString(3));
-      degree_ids.add(String.valueOf(out.charAt(0)));
+      String[] words = out.split(" ");
+
+      // add the mentor to list of available mentors
+      degree_ids.add(words[0]);
       System.out.println(out);
     }
     System.out.println("Which degree would you like to select? Type the id number.");
@@ -479,12 +499,16 @@ public class MentorFinder {
 
   public String country_mentors(Connection conn, Integer countryID) throws SQLException {
     List<String> country_mentors_ids = new ArrayList<>();
-    String command = "CALL country_mentors( " + countryID + ");";
+    String command = "Select * FROM mentors where country_id = " + countryID;
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
+    System.out.println("Username\t\t\tFirst Name\t\t\tLast Name\t\t\t\tCountry\t\t\t\tEthnicity\t\t\tGender Identity\t\t Degree\t\t\t\tField\t\t\tCurrent Organization\t\t\tLinkedin\n");
+
+
 
     while (rs.next()) {
-      String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s %-20s",
+
+      String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s",
               rs.getString(1),
               rs.getString(2),
               rs.getString(3),
@@ -494,7 +518,6 @@ public class MentorFinder {
               rs.getInt(7),
               rs.getInt(8),
               rs.getInt(9),
-              rs.getString(10),
               rs.getString(11)
 
       );
@@ -503,11 +526,14 @@ public class MentorFinder {
       // add the mentor to list of available mentors
       country_mentors_ids.add(words[0]);
 
+
       System.out.println(out);
     }
     System.out.println("Which mentor would you like to message? Please enter their userID.");
     //Scanner sc = new Scanner(System.in);
     String mentor = sc.nextLine();
+
+
 
     while (!country_mentors_ids.contains(mentor)) {
       System.out.println("Sorry, that is not a valid choice. Please enter a valid answer" +
@@ -520,12 +546,13 @@ public class MentorFinder {
 
   public String organization_mentors(Connection conn, Integer currentOrganizationID) throws SQLException {
     List<String> org_mentors_ids = new ArrayList<>();
-    String command = "CALL organization_mentors(" + currentOrganizationID + ");";
+    String command = "Select * FROM mentors where current_organization_id = " + currentOrganizationID;
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
+    System.out.println("Username\t\t\tFirst Name\t\t\tLast Name\t\t\t\tCountry\t\t\t\tEthnicity\t\t\tGender Identity\t\t Degree\t\t\t\tField\t\t\tCurrent Organization\t\t\tLinkedin\n");
 
     while (rs.next()) {
-      String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s %-20s",
+      String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s",
               rs.getString(1),
               rs.getString(2),
               rs.getString(3),
@@ -535,7 +562,6 @@ public class MentorFinder {
               rs.getInt(7),
               rs.getInt(8),
               rs.getInt(9),
-              rs.getString(10),
               rs.getString(11)
       );
       String[] words = out.split(" ");
@@ -559,9 +585,10 @@ public class MentorFinder {
 
   public String ethnicity_mentors(Connection conn, Integer ethnicityID) throws SQLException {
     List<String> ethnicity_mentors_ids = new ArrayList<>();
-    String command = "CALL ethnicity_mentors(" + ethnicityID + ");";
+    String command = "Select * FROM mentors where ethnicity_id = " + ethnicityID;
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
+    System.out.println("Username\t\t\tFirst Name\t\t\tLast Name\t\t\t\tCountry\t\t\t\tEthnicity\t\t\tGender Identity\t\t Degree\t\t\t\tField\t\t\tCurrent Organization\t\t\tLinkedin\n");
 
     while (rs.next()) {
       String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s %-20s",
@@ -598,9 +625,11 @@ public class MentorFinder {
 
   public String field_mentors(Connection conn, Integer fieldID) throws SQLException {
     List<String> field_mentors_ids = new ArrayList<>();
-    String command = "CALL field_mentors(" + fieldID + ");";
+    String command = "Select * FROM mentors where field_id = " + fieldID;
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
+
+
 
     while (rs.next()) {
       String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s %-20s",
@@ -636,7 +665,7 @@ public class MentorFinder {
 
   public String degree_mentors(Connection conn, Integer degreeID) throws SQLException {
     List<String> degree_mentors_ids = new ArrayList<>();
-    String command = "CALL field_mentors(" + degreeID + ");";
+    String command = "Select * FROM mentors where degree_id = " + degreeID;
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
 
@@ -673,7 +702,7 @@ public class MentorFinder {
   }
 
   public boolean is_registered(Connection conn, String userID) throws SQLException {
-    String command = "CALL is_registered(\'" + userID + "\');";
+    String command = "Select * FROM mentee where user_id = '" + userID + "'";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
     return rs.next();
@@ -681,7 +710,7 @@ public class MentorFinder {
   }
 
   public Integer find_country_id(Connection conn, String country) throws SQLException {
-    String command = "CALL find_country_id(\' " + country + "\');";
+    String command = "Select country_id FROM country where name = '" + country + "'";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
     rs.next();
@@ -692,7 +721,7 @@ public class MentorFinder {
   }
 
   public Integer find_field_id(Connection conn, String field) throws SQLException {
-    String command = "CALL find_field_id(\' " + field + "\');";
+    String command = "Select field_id FROM stem_field where field_name = '" + field + "'";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
     rs.next();
@@ -749,7 +778,7 @@ public class MentorFinder {
   }
 
   public Integer find_request_id(Connection conn, String mentor, String mentee) throws SQLException {
-    String command = "CALL find_request_id( \'" + mentor + "\', \'" + mentee + "\');";
+    String command = "Select request_id FROM request_status where mentor_id = '" + mentor + "' and mentee_id = '" + mentee + "'";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
     rs.next();
@@ -834,7 +863,7 @@ public class MentorFinder {
   }
 
   public void check_requests(Connection conn, String mentee) throws SQLException {
-    String command = "CALL check_requests(\' " + mentee + "\');";
+    String command = "Select * FROM request_status where mentee_id = '" + mentee + "'";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
 
@@ -895,25 +924,23 @@ public class MentorFinder {
     }
   }
 
-  public static void main(String[] args) throws SQLException, FileNotFoundException {
-    // Read server_connect.txt which contains username and password of the local database
-    String curDir = System.getProperty("user.dir");
-    String file_name = curDir + "//server_connect.txt";
-    System.out.println(file_name);
-    File file = new File(file_name);
+  public static void main(String[] args) throws SQLException {
     // Create a Scanner object for inputs
-    Scanner scanFile = new Scanner(file);
-    String userName = scanFile.nextLine();
-    String password = scanFile.nextLine();
+    Scanner sc = new Scanner(System.in);
+
+    // Prompt user for MySQL username
+    System.out.println("Enter MySQL username ");
+    String userName = sc.nextLine();
+    // Prompt user for password
+    System.out.println("Enter password ");
+    String password = sc.nextLine();
 
     // check username and password
-    userName = userName.split(" ")[1];
-    password = password.split(" ")[1];
     System.out.println("Username is: " + userName);
     System.out.println("Password is: " + password);
 
-    Scanner sc = new Scanner(System.in);
-    // Establish connection to mentorfinder database using username and password
+    // Question 2
+    // Establish connection to sharkDB database using username and password
     MentorFinder obj = new MentorFinder(userName, password);
     Connection con = obj.getConnection();
 

@@ -522,50 +522,29 @@ DELIMITER ;
 /* 
 Trigger to delete the message request from pending requests table when a request is accepted or declined.
 
--- MAKE A TRIGGER 
-DROP PROCEDURE IF EXISTS delete_req_from_pending;
-DELIMITER //
-CREATE PROCEDURE delete_req_from_pending(request_id INT, mentor VARCHAR(100)) 
-BEGIN 
-
-DELETE FROM pending_requests
- WHERE request_id = request_id 
- AND mentor_id =  mentor ;
- 
-END // 
-DELIMITER ;
 
 */
 DROP TRIGGER IF EXISTS delete_requests;
 DELIMITER //
-CREATE TRIGGER delete_requests
-AFTER UPDATE ON request_status
+CREATE TRIGGER 
+message_request_trigger
+AFTER UPDATE ON 
+request_status
 FOR EACH ROW 
-
 BEGIN 
-
-DECLARE request INT;
-
-SELECT 
-    request_id
-INTO request FROM
-    (SELECT 
-        location, COUNT(location) AS attack_count
-    FROM
-        attack
-    GROUP BY location) AS t1
-WHERE
-    location = new.location;
-
--- update new value
-UPDATE township 
-SET 
-    numAttacks = numAttacks_var
-WHERE
-    township.tid = new.location;
+DELETE 
+FROM pending_requests
+WHERE request_id = OLD.request_id;
 END//
 DELIMITER ;
 
+SELECT * FROM request_status;
+
+UPDATE request_status
+SET status = "APPROVED" WHERE request_id = 2 
+ AND mentor_id =  'sabu8796!!' ;
+
+SELECT * FROM pending_requests;
 /*
 
 */
@@ -776,4 +755,3 @@ END //
 DELIMITER ;
 
 -- create TRIGGER?? 
-

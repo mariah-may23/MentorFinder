@@ -468,6 +468,10 @@ INSERT INTO mentorship( mentor_id, mentee_id, durationOfMentorship, startDate, e
 VALUES ("alexa03", "Mariah03", 3, "1997-03-01", "1997-05-01");
 
 
+
+/* 
+Procedure to show present mentees under a mentor in the database.
+*/ 
 DROP PROCEDURE IF EXISTS show_current_mentees;
 
 DELIMITER //
@@ -479,7 +483,10 @@ BEGIN
 END // 
 DELIMITER ;
 
--- MAKE THIS A TRIGGER
+
+/* 
+Update the status of mentorship request to declined when a mentor declines request.
+*/
 DROP PROCEDURE IF EXISTS change_status_declined;
 
 DELIMITER //
@@ -493,7 +500,10 @@ SET status = "DECLINED" WHERE request_id = request_id
 END // 
 DELIMITER ;
 
--- MAKE THIS A TRIGGER
+
+/* 
+Update the status of mentorship request to approved when a mentor accepts a request.
+*/
 DROP PROCEDURE IF EXISTS change_status_approved;
 
 DELIMITER //
@@ -508,10 +518,12 @@ END //
 DELIMITER ;
 
 
+
+/* 
+Trigger to delete the message request from pending requests table when a request is accepted or declined.
+
 -- MAKE A TRIGGER 
-
 DROP PROCEDURE IF EXISTS delete_req_from_pending;
-
 DELIMITER //
 CREATE PROCEDURE delete_req_from_pending(request_id INT, mentor VARCHAR(100)) 
 BEGIN 
@@ -523,7 +535,40 @@ DELETE FROM pending_requests
 END // 
 DELIMITER ;
 
+*/
+DROP TRIGGER IF EXISTS delete_requests;
+DELIMITER //
+CREATE TRIGGER delete_requests
+AFTER UPDATE ON request_status
+FOR EACH ROW 
 
+BEGIN 
+
+DECLARE request INT;
+
+SELECT 
+    request_id
+INTO request FROM
+    (SELECT 
+        location, COUNT(location) AS attack_count
+    FROM
+        attack
+    GROUP BY location) AS t1
+WHERE
+    location = new.location;
+
+-- update new value
+UPDATE township 
+SET 
+    numAttacks = numAttacks_var
+WHERE
+    township.tid = new.location;
+END//
+DELIMITER ;
+
+/*
+
+*/
 DROP PROCEDURE IF EXISTS show_requests;
 
 DELIMITER //
@@ -731,3 +776,4 @@ END //
 DELIMITER ;
 
 -- create TRIGGER?? 
+

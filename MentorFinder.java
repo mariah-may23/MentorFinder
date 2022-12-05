@@ -86,7 +86,7 @@ public class MentorFinder {
     try {
 
       String sql = "CALL change_status_declined("
-              + request_id +", \' "  + mentor + "\');";
+              + request_id +", \'"  + mentor + "\');";
       stmt = con.createStatement();
       int update = stmt.executeUpdate(sql);
       if(update == 0) {
@@ -111,11 +111,12 @@ public class MentorFinder {
     // Retrieve list of mentees under the mentor
     try {
 
-      String sql = "CALL change_status_declined("
-              + request_id +", \' "  + mentor + "\');";
+      String sql = "CALL change_status_approved("
+              + request_id +", \'"  + mentor + "\');";
+      System.out.println(sql);
       stmt = con.createStatement();
       int update = stmt.executeUpdate(sql);
-      //System.out.println(update);
+      System.out.println(update);
       if(update == 1) {
         System.out.println("Request ID " + request_id + " APPROVED! ");
       }
@@ -128,8 +129,6 @@ public class MentorFinder {
       System.out.println(SQLe.getMessage());
 
     }
-
-
     stmt.close();
 
   }
@@ -143,7 +142,7 @@ public class MentorFinder {
     try {
 
       String sql = "CALL delete_req_from_pending( "
-              + request_id +", \' "  + mentor + "\');";
+              + request_id +", \'"  + mentor + "\');";
       stmt = con.createStatement();
       int delete = stmt.executeUpdate(sql);
 
@@ -202,6 +201,7 @@ public class MentorFinder {
         }
         // make change in the status table to approved ->
         change_status_approved(con, approve_reqs, mentor);
+        System.out.println();
 
         //delete_req_from_pending(con, approve_reqs, mentor);
       }
@@ -698,7 +698,7 @@ public class MentorFinder {
   }
 
   public Integer find_country_id(Connection conn, String country) throws SQLException {
-    String command = "CALL find_country_id(\' " + country + "\');";
+    String command = "CALL find_country_id(\'" + country + "\');";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
     rs.next();
@@ -709,7 +709,7 @@ public class MentorFinder {
   }
 
   public Integer find_field_id(Connection conn, String field) throws SQLException {
-    String command = "CALL find_field_id(\' " + field + "\');";
+    String command = "CALL find_field_id(\'" + field + "\');";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
     rs.next();
@@ -851,7 +851,7 @@ public class MentorFinder {
   }
 
   public void check_requests(Connection conn, String mentee) throws SQLException {
-    String command = "CALL check_requests(\' " + mentee + "\');";
+    String command = "CALL check_requests(\'" + mentee + "\');";
     Statement st = conn.createStatement();
     ResultSet rs = st.executeQuery(command);
 

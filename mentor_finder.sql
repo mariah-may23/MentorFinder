@@ -432,7 +432,7 @@ VALUES (1, "alexa03", "Mariah03", "Hello World!"),
 (10, "lauren333", "tiguBru", "Hello World!");
 
 INSERT INTO mentorship( mentor_id, mentee_id, durationOfMentorship, startDate, endDate) 
-VALUES ("alexa03", "Mariah03", 3, "1997-03-01", "1997-05-01");
+VALUES ("alexa03", "jbOnhigh!", 3, "1997-03-01", "1997-05-01");
 
 
 
@@ -442,10 +442,10 @@ Procedure to show present mentees under a mentor in the database.
 DROP PROCEDURE IF EXISTS show_current_mentees;
 
 DELIMITER //
-CREATE PROCEDURE show_current_mentees(mentor_id VARCHAR(100)) 
+CREATE PROCEDURE show_current_mentees(mentor VARCHAR(100)) 
 BEGIN 
 
-	SELECT * FROM mentorship WHERE mentor_id = mentor_id;
+	SELECT * FROM mentorship WHERE mentor_id = mentor;
 
 END // 
 DELIMITER ;
@@ -457,11 +457,11 @@ Update the status of mentorship request to declined when a mentor declines reque
 DROP PROCEDURE IF EXISTS change_status_declined;
 
 DELIMITER //
-CREATE PROCEDURE change_status_declined(request_id INT, mentor VARCHAR(100)) 
+CREATE PROCEDURE change_status_declined(request INT, mentor VARCHAR(100)) 
 BEGIN 
 
 UPDATE request_status
-SET status = "DECLINED" WHERE request_id = request_id 
+SET status = "DECLINED" WHERE request = request_id 
  AND mentor_id =  mentor ;
  
 END // 
@@ -474,17 +474,18 @@ Update the status of mentorship request to approved when a mentor accepts a requ
 DROP PROCEDURE IF EXISTS change_status_approved;
 
 DELIMITER //
-CREATE PROCEDURE change_status_approved(request_id INT, mentor VARCHAR(100)) 
+CREATE PROCEDURE change_status_approved(request INT, mentor VARCHAR(100)) 
 BEGIN 
 
 UPDATE request_status
-SET status = "APPROVED" WHERE request_id = request_id 
- AND mentor_id =  mentor ;
+SET status = "APPROVED" 
+WHERE request_id = request AND mentor_id =  mentor ;
  
 END // 
 DELIMITER ;
-
-
+-- SELECT * from request_status where mentor_id = 'alexa03' and request_id  = 1;
+-- SELECT * from request_status where mentor_id = 'alexa03';
+-- CALL change_status_approved(1, 'alexa03');
 
 /* 
 Trigger to delete the message request from pending requests table when a request is accepted or declined.
@@ -509,8 +510,7 @@ DELIMITER ;
 TRIGGER to add new relation to the mentorship table once request is approved
 */
 DELIMITER //
-CREATE TRIGGER 
-add_mentorship
+CREATE TRIGGER  add_mentorship
 AFTER UPDATE ON 
 request_status
 FOR EACH ROW 
@@ -531,6 +531,7 @@ DELIMITER ;
 
 END//
 DELIMITER ;
+
 /*
 Proedure to show pending requests for the mentor.
 */
@@ -647,10 +648,10 @@ Procedure to display mentor information for a particular country.
 DROP PROCEDURE IF EXISTS country_mentors;
 
 DELIMITER //
-CREATE PROCEDURE country_mentors(country_id INT) 
+CREATE PROCEDURE country_mentors(country INT) 
 BEGIN 
 
-Select * FROM mentors where country_id = country_id;
+Select * FROM mentors where country_id = country;
 
 END // 
 DELIMITER ;
@@ -690,10 +691,10 @@ Procedure to display mentor information for a particular field.
 DROP PROCEDURE IF EXISTS field_mentors;
 
 DELIMITER //
-CREATE PROCEDURE field_mentors(fieldID INT) 
+CREATE PROCEDURE field_mentors(field INT) 
 BEGIN 
 
-Select * FROM mentors WHERE fieldID = fieldID;
+Select * FROM mentors WHERE fieldID = field;
 
 END // 
 DELIMITER ;
@@ -704,10 +705,10 @@ Procedure to display mentor information for a particular degree.
 DROP PROCEDURE IF EXISTS degree_mentors;
 
 DELIMITER //
-CREATE PROCEDURE degree_mentors(degreeID INT) 
+CREATE PROCEDURE degree_mentors(degree INT) 
 BEGIN 
 
-Select * FROM mentors WHERE degreeID = degreeID;
+Select * FROM mentors WHERE degreeID = degree;
 
 END // 
 DELIMITER ;

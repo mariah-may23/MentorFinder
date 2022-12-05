@@ -467,3 +467,267 @@ VALUES (1, "alexa03", "Mariah03", "Hello World!"),
 INSERT INTO mentorship( mentor_id, mentee_id, durationOfMentorship, startDate, endDate) 
 VALUES ("alexa03", "Mariah03", 3, "1997-03-01", "1997-05-01");
 
+
+DROP PROCEDURE IF EXISTS show_current_mentees;
+
+DELIMITER //
+CREATE PROCEDURE show_current_mentees(mentor_id VARCHAR(100)) 
+BEGIN 
+
+	SELECT * FROM mentorship WHERE mentor_id = mentor_id;
+
+END // 
+DELIMITER ;
+
+-- MAKE THIS A TRIGGER
+DROP PROCEDURE IF EXISTS change_status_declined;
+
+DELIMITER //
+CREATE PROCEDURE change_status_declined(request_id INT, mentor VARCHAR(100)) 
+BEGIN 
+
+UPDATE request_status
+SET status = "DECLINED" WHERE request_id = request_id 
+ AND mentor_id =  mentor ;
+ 
+END // 
+DELIMITER ;
+
+-- MAKE THIS A TRIGGER
+DROP PROCEDURE IF EXISTS change_status_approved;
+
+DELIMITER //
+CREATE PROCEDURE change_status_approved(request_id INT, mentor VARCHAR(100)) 
+BEGIN 
+
+UPDATE request_status
+SET status = "APPROVED" WHERE request_id = request_id 
+ AND mentor_id =  mentor ;
+ 
+END // 
+DELIMITER ;
+
+
+-- MAKE A TRIGGER 
+
+DROP PROCEDURE IF EXISTS delete_req_from_pending;
+
+DELIMITER //
+CREATE PROCEDURE delete_req_from_pending(request_id INT, mentor VARCHAR(100)) 
+BEGIN 
+
+DELETE FROM pending_requests
+ WHERE request_id = request_id 
+ AND mentor_id =  mentor ;
+ 
+END // 
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS show_requests;
+
+DELIMITER //
+CREATE PROCEDURE show_requests( mentor VARCHAR(100)) 
+BEGIN 
+
+SELECT * FROM pending_requests WHERE mentor_id = mentor ;
+ 
+END // 
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS mentor_is_registered;
+
+DELIMITER //
+CREATE PROCEDURE mentor_is_registered( mentor VARCHAR(100)) 
+BEGIN 
+
+Select * FROM mentors where mentor_id = mentor;
+ 
+END // 
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS printCountries;
+
+DELIMITER //
+CREATE PROCEDURE printCountries() 
+BEGIN 
+
+SELECT DISTINCT country.* FROM country 
+INNER JOIN mentors ON country.country_id = mentors.country_id ;
+
+END // 
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS printOrganizations;
+
+DELIMITER //
+CREATE PROCEDURE printOrganizations() 
+BEGIN 
+
+Select organization.* FROM organization 
+INNER JOIN mentors ON 
+organization.current_organization_id = mentors.current_organization_id;
+
+END // 
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS printEthnicities;
+
+DELIMITER //
+CREATE PROCEDURE printEthnicities() 
+BEGIN 
+
+Select ethnicity.* FROM ethnicity 
+INNER JOIN mentors 
+ON ethnicity.ethnicity_id = mentors.ethnicity_id;
+
+END // 
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS printFields;
+
+DELIMITER //
+CREATE PROCEDURE printFields() 
+BEGIN 
+
+Select stem_field.* FROM stem_field 
+INNER JOIN mentors 
+ON stem_field.field_id = mentors.field_id;
+
+END // 
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS printDegrees;
+
+DELIMITER //
+CREATE PROCEDURE printDegrees() 
+BEGIN 
+
+Select degree.* FROM degree 
+INNER JOIN mentors 
+ON degree.degree_id = mentors.degree_id;
+
+END // 
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS country_mentors;
+
+DELIMITER //
+CREATE PROCEDURE country_mentors(country_id INT) 
+BEGIN 
+
+Select * FROM mentors where country_id = country_id;
+
+END // 
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS organization_mentors;
+
+DELIMITER //
+CREATE PROCEDURE organization_mentors(currentOrganizationID INT) 
+BEGIN 
+
+Select * FROM mentors 
+where current_organization_id = currentOrganizationID;
+
+END // 
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS ethnicity_mentors;
+
+DELIMITER //
+CREATE PROCEDURE ethnicity_mentors(ethnicityID INT) 
+BEGIN 
+
+Select * FROM mentors WHERE ethnicity_id = ethnicityID;
+
+END // 
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS field_mentors;
+
+DELIMITER //
+CREATE PROCEDURE field_mentors(fieldID INT) 
+BEGIN 
+
+Select * FROM mentors WHERE fieldID = fieldID;
+
+END // 
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS degree_mentors;
+
+DELIMITER //
+CREATE PROCEDURE degree_mentors(degreeID INT) 
+BEGIN 
+
+Select * FROM mentors WHERE degreeID = degreeID;
+
+END // 
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS is_registered;
+
+DELIMITER //
+CREATE PROCEDURE is_registered(userID VARCHAR(100)) 
+BEGIN 
+
+Select * FROM mentee where user_id = userID;
+
+END // 
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS find_country_id;
+
+DELIMITER //
+CREATE PROCEDURE find_country_id(country VARCHAR(100)) 
+BEGIN 
+
+Select country_id FROM country 
+where name = country ;
+
+END // 
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS find_field_id;
+
+DELIMITER //
+CREATE PROCEDURE find_field_id(field VARCHAR(100)) 
+BEGIN 
+
+Select field_id FROM stem_field
+where field_name = field;
+ 
+END // 
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS find_request_id;
+
+DELIMITER //
+CREATE PROCEDURE find_request_id(mentor VARCHAR(100), mentee VARCHAR(100)) 
+BEGIN 
+
+Select request_id FROM request_status 
+WHERE mentor_id = mentor AND mentee_id =  mentee ;
+ 
+END // 
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS check_requests;
+
+DELIMITER //
+CREATE PROCEDURE check_requests(mentee VARCHAR(100)) 
+BEGIN 
+
+Select * FROM request_status
+WHERE mentee_id = mentee;
+
+END // 
+DELIMITER ;
+
+-- create TRIGGER?? 

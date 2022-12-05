@@ -203,7 +203,7 @@ public class MentorFinder {
         // make change in the status table to approved ->
         change_status_approved(con, approve_reqs, mentor);
 
-        delete_req_from_pending(con, approve_reqs, mentor);
+        //delete_req_from_pending(con, approve_reqs, mentor);
       }
       catch (NumberFormatException e) {
         System.out.println("Invalid Input. Try again");
@@ -349,10 +349,13 @@ public class MentorFinder {
       String out = String.format("%d %s",
               rs.getInt(1),
               rs.getString(2));
-      country_ids.add(String.valueOf(out.charAt(0)));
+
+      String[] words = out.split(" ");
+      // add the country to list of available mentors
+      country_ids.add(words[0]);
+
       System.out.println(out);
     }
-
 
     System.out.println("Which country would you like to select? Type the id number.");
     // Scanner sc = new Scanner(System.in);
@@ -366,6 +369,7 @@ public class MentorFinder {
 
 
     return Integer.valueOf(option);
+
   }
 
   public Integer printOrganizations(Connection conn) throws SQLException {
@@ -379,7 +383,10 @@ public class MentorFinder {
       String out = String.format("%d %s",
               rs.getInt(1),
               rs.getString(2));
-      organization_ids.add(String.valueOf(out.charAt(0)));
+      String[] words = out.split(" ");
+
+      // add the organization to list of available mentors
+      organization_ids.add(words[0]);
       System.out.println(out);
     }
 
@@ -406,7 +413,11 @@ public class MentorFinder {
       String out = String.format("%d %s",
               rs.getInt(1),
               rs.getString(2));
-      ethnicity_ids.add(String.valueOf(out.charAt(0)));
+      String[] words = out.split(" ");
+
+      // add the ethnicity to list of available mentors
+      ethnicity_ids.add(words[0]);
+
       System.out.println(out);
     }
     System.out.println("Which ethnicity would you like to select? Type the id number.");
@@ -433,7 +444,10 @@ public class MentorFinder {
       String out = String.format("%d %s",
               rs.getInt(1),
               rs.getString(2));
-      field_ids.add(String.valueOf(out.charAt(0)));
+      String[] words = out.split(" ");
+
+      // add the field to list of available mentors
+      field_ids.add(words[0]);
       System.out.println(out);
     }
     System.out.println("Which field would you like to select? Type the id number.");
@@ -462,7 +476,10 @@ public class MentorFinder {
               rs.getInt(1),
               rs.getString(2),
               rs.getString(3));
-      degree_ids.add(String.valueOf(out.charAt(0)));
+      String[] words = out.split(" ");
+
+      // add the degree to list of available mentors
+      degree_ids.add(words[0]);
       System.out.println(out);
     }
     System.out.println("Which degree would you like to select? Type the id number.");

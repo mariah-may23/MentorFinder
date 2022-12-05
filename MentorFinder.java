@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -894,31 +895,25 @@ public class MentorFinder {
     }
   }
 
-  public static void main(String[] args) throws SQLException {
+  public static void main(String[] args) throws SQLException, FileNotFoundException {
     // Read server_connect.txt which contains username and password of the local database
     String curDir = System.getProperty("user.dir");
     String file_name = curDir + "//server_connect.txt";
-    try {
-      InputStream file = new FileInputStream(file_name);
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
+    System.out.println(file_name);
+    File file = new File(file_name);
     // Create a Scanner object for inputs
-    Scanner sc = new Scanner(System.in);
-
-    // Prompt user for MySQL username
-    System.out.println("Enter MySQL username ");
-    String userName = sc.nextLine();
-    // Prompt user for password
-    System.out.println("Enter password ");
-    String password = sc.nextLine();
+    Scanner scanFile = new Scanner(file);
+    String userName = scanFile.nextLine();
+    String password = scanFile.nextLine();
 
     // check username and password
+    userName = userName.split(" ")[1];
+    password = password.split(" ")[1];
     System.out.println("Username is: " + userName);
     System.out.println("Password is: " + password);
 
-    // Question 2
-    // Establish connection to sharkDB database using username and password
+    Scanner sc = new Scanner(System.in);
+    // Establish connection to mentorfinder database using username and password
     MentorFinder obj = new MentorFinder(userName, password);
     Connection con = obj.getConnection();
 

@@ -521,10 +521,8 @@ DELIMITER ;
 
 /* 
 Trigger to delete the message request from pending requests table when a request is accepted or declined.
-
-
 */
-DROP TRIGGER IF EXISTS delete_requests;
+DROP TRIGGER IF EXISTS message_request_trigger;
 DELIMITER //
 CREATE TRIGGER 
 message_request_trigger
@@ -532,21 +530,42 @@ AFTER UPDATE ON
 request_status
 FOR EACH ROW 
 BEGIN 
+
 DELETE 
 FROM pending_requests
 WHERE request_id = OLD.request_id;
+
 END//
 DELIMITER ;
 
-SELECT * FROM request_status;
-
-UPDATE request_status
-SET status = "APPROVED" WHERE request_id = 2 
- AND mentor_id =  'sabu8796!!' ;
-
-SELECT * FROM pending_requests;
 /*
+TRIGGER to add new relation to the mentorship table once request is approved
+*/
+DELIMITER //
+CREATE TRIGGER 
+add_mentorship
+AFTER UPDATE ON 
+request_status
+FOR EACH ROW 
+BEGIN 
 
+-- DECLARE current_date DATE;
+DECLARE date_add DATE;
+
+-- SELECT curdate() into current_date;
+SELECT date_add(current_date, INTERVAL 3 MONTH) into date_add;
+
+IF (NEW.status = 'APPROVED') THEN
+	INSERT INTO mentorship(mentor_id, mentee_id, durationOfMentorship, startDate, endDate) 
+	VALUES (OLD.mentor_id,OLD.mentee_id, 3, current_date, date_add);
+END IF;
+END//
+DELIMITER ;
+
+END//
+DELIMITER ;
+/*
+Proedure to show pending requests for the mentor.
 */
 DROP PROCEDURE IF EXISTS show_requests;
 
@@ -559,6 +578,11 @@ SELECT * FROM pending_requests WHERE mentor_id = mentor ;
 END // 
 DELIMITER ;
 
+
+/*
+Procedure to check if the entered mentor ID is already in the database.
+*/
+
 DROP PROCEDURE IF EXISTS mentor_is_registered;
 
 DELIMITER //
@@ -570,7 +594,9 @@ Select * FROM mentors where mentor_id = mentor;
 END // 
 DELIMITER ;
 
-
+/*
+Procedure to display all mentor's country names.
+*/
 DROP PROCEDURE IF EXISTS printCountries;
 
 DELIMITER //
@@ -583,6 +609,9 @@ INNER JOIN mentors ON country.country_id = mentors.country_id ;
 END // 
 DELIMITER ;
 
+/*
+Procedure to display all mentor's organization names.
+*/
 DROP PROCEDURE IF EXISTS printOrganizations;
 
 DELIMITER //
@@ -596,7 +625,9 @@ organization.current_organization_id = mentors.current_organization_id;
 END // 
 DELIMITER ;
 
-
+/*
+Procedure to display all mentor's ethnicities.
+*/
 DROP PROCEDURE IF EXISTS printEthnicities;
 
 DELIMITER //
@@ -610,6 +641,9 @@ ON ethnicity.ethnicity_id = mentors.ethnicity_id;
 END // 
 DELIMITER ;
 
+/*
+Procedure to display all mentor's STEM fields.
+*/
 DROP PROCEDURE IF EXISTS printFields;
 
 DELIMITER //
@@ -622,6 +656,10 @@ ON stem_field.field_id = mentors.field_id;
 
 END // 
 DELIMITER ;
+
+/*
+Procedure to display all mentor's degree types.
+*/
 
 DROP PROCEDURE IF EXISTS printDegrees;
 
@@ -636,6 +674,9 @@ ON degree.degree_id = mentors.degree_id;
 END // 
 DELIMITER ;
 
+/*
+Procedure to display mentor information for a particular country.
+*/
 DROP PROCEDURE IF EXISTS country_mentors;
 
 DELIMITER //
@@ -647,6 +688,9 @@ Select * FROM mentors where country_id = country_id;
 END // 
 DELIMITER ;
 
+/*
+Procedure to display mentor information for a particular organization.
+*/
 DROP PROCEDURE IF EXISTS organization_mentors;
 
 DELIMITER //
@@ -659,7 +703,9 @@ where current_organization_id = currentOrganizationID;
 END // 
 DELIMITER ;
 
-
+/*
+Procedure to display mentor information for a particular ethnicity.
+*/
 DROP PROCEDURE IF EXISTS ethnicity_mentors;
 
 DELIMITER //
@@ -671,6 +717,9 @@ Select * FROM mentors WHERE ethnicity_id = ethnicityID;
 END // 
 DELIMITER ;
 
+/*
+Procedure to display mentor information for a particular field.
+*/
 DROP PROCEDURE IF EXISTS field_mentors;
 
 DELIMITER //
@@ -682,7 +731,9 @@ Select * FROM mentors WHERE fieldID = fieldID;
 END // 
 DELIMITER ;
 
-
+/*
+Procedure to display mentor information for a particular degree.
+*/
 DROP PROCEDURE IF EXISTS degree_mentors;
 
 DELIMITER //
@@ -694,6 +745,9 @@ Select * FROM mentors WHERE degreeID = degreeID;
 END // 
 DELIMITER ;
 
+/*
+Procedure to check if mentee exists in our database.
+*/
 DROP PROCEDURE IF EXISTS is_registered;
 
 DELIMITER //
@@ -718,6 +772,9 @@ END //
 DELIMITER ;
 
 
+/*
+Procedure to find the field is of a particular field.
+*/
 DROP PROCEDURE IF EXISTS find_field_id;
 
 DELIMITER //
@@ -730,6 +787,10 @@ where field_name = field;
 END // 
 DELIMITER ;
 
+
+/*
+Procedure to find the request id of a particular request.
+*/
 DROP PROCEDURE IF EXISTS find_request_id;
 
 DELIMITER //
@@ -754,4 +815,3 @@ WHERE mentee_id = mentee;
 END // 
 DELIMITER ;
 
--- create TRIGGER?? 

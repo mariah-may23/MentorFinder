@@ -65,7 +65,6 @@ gender_identity VARCHAR(20),
 degree_id INT NOT NULL,
 field_id INT NOT NULL,
 current_organization_id INT NOT NULL,
-bio VARCHAR(800) NOT NULL,
 linkedIn VARCHAR(80) NOT NULL,
 CONSTRAINT mentors_fk_country FOREIGN KEY (country_id)
 REFERENCES country (country_id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -339,75 +338,43 @@ VALUES
 
 
 INSERT INTO mentors (mentor_id, first_name, last_name, country_id, ethnicity_id, gender_identity, degree_id, field_id, current_organization_id,
-bio, linkedIn) VALUES ( "alexa03", "Alexa", "Doe", 1, 1, "FEMALE", 1, 1 , 1, "Hello World!", 
+linkedIn) VALUES ( "alexa03", "Alexa", "Doe", 1, 1, "FEMALE", 1, 1 , 1,
 "https://www.linkedin.com/in/hgn"),
 
 ("HanaGab21", "Hana", "Gabriella", 185, 1, "FEMALE", 86, 1, 29, 
-"Hello, everyone. I identify as a queer neurodivergent woman, so feel free to ask me what's it like navigating those identities in tech. 
-Outside of work, I volunteer at All Tech Is Human. I'm passionate about tech ethics & disability activism.",
  "https://www.linkedin.com/in/hgn") ,
  
 ("Nicolas11", "Nicolas", "Lip", 185, 7, "MALE", 78, 3, 49,
-"Leveraging nearly a decade of post-graduate experience, critical thinking skills, high EQ, and Talent Acquisition expertise to build & own the 
-recruiting function and scale teams & businesses. I've helped 1000s of folx as a career coach as well.", 
  "https://www.linkedin.com/in/hgn" ) ,
  
 ("lauren333", "Lauren", "Simson", 185, 3, "FEMALE", 64, 1, 69,
-"AI/ML Product Manager/Owner & UX Designer at Adobe.
-Graduated from Cornell with BA in Information Science with a concentration in User Experience and a minor in Business. 
-I've done 2 UX design internships and one SWE. Love volleyball!", 
  "https://www.linkedin.com/in/hgn") ,
  
 ("tanShan09", "Tanshanika", "Smith", 185, 4, "FEMALE", 33, 1, 77,
-"I have over 20 years of combined information technology, risk management, and security experience.
-Tan enjoys collaborating with others on emerging information security risks and goal is to visit all seven continents." ,
 "https://www.linkedin.com/in/hgn") ,
 
 ("arshi20!", "Salma", "Arsh", 185, 5, "FEMALE", 88, 1, 14,
-" recently graduated from Columbia University, Barnard College.
- I have a strong foundation in psychology and cognitive science.
- Equity, inclusion, and accessibility are one of my core values",
 "https://www.linkedin.com/in/hgn") ,
 
 
 ("sabu8796!!", "Rossa", "Sabu", 130, 5, "FEMALE", 72, 3, 29,
-" Recent Grad w/ BS in Communications & Data Science,
- TDP @ Accenture; Hobbies & passions: dance, digital design, data.
- I enjoy resume reviewing & am happy to offer insights on 
- navigating college/internships. Let's grab a virtual coffee!" ,
 "https://www.linkedin.com/in/hgn") ,
 
 ("saeed90!", "Ariij", "Saaed", 138, 5, "FEMALE", 82, 1, 11,
-" I graduated with Bachelor’s in computer science.
- I have been mentoring with other organizations since the end of 2020. Under my supervision,
- many women in tech made their successful career." ,
+
 "https://www.linkedin.com/in/hgn") ,
 
 ("nidhi@11", "Nidhi", "Kapur", 79, 5, "FEMALE", 59, 1, 9,
-"I am a Third-year Computer Engineering student based in India. 
-I've always wanted to have new experiences and participate in practical programmes. 
-All of my projects are built from the ground up,
- allowing me to offer fully unique solutions." ,
 "https://www.linkedin.com/in/hgn") ,
 
 ("Qin990!", "Xio", "Qin", 76, 5, "FEMALE", 62, 2, 20,
-"I recently graduated from Hong kong University, Barnard College.
- I have a strong foundation in psychology and cognitive science.
- Equity, inclusion, and accessibility are one of my core values" ,
 "https://www.linkedin.com/in/hgn") ,
 
 ("arshi2!", "Salma", "Arsh", 1, 5, "FEMALE", 53, 2, 24,
-"I am a CS grad student at NEU Seattle.
- Before this, I study liberal arts in Japan. 
- I am working as a TA at my university and also a mentor to help students transfer from non-tech into technologies.
- Besides coding, I enjoy reading and painting." ,
+
 "https://www.linkedin.com/in/hgn") ,
 
 ("saimy79=!", "Saimy", "Kaur", 12, 5, "FEMALE", 38, 1, 18,
-"Resume Review/Tips, Interview Practice/Tips,
- Networking/Job Search Tips, Applying to Grad School, 
- Explore Career/Interest Options, Leadership/Career Growth Topics,
- Confidence/Resilience Topics, Share Personal Experience as Woman in Tech", 
 "https://www.linkedin.com/in/hgn") ;
 
 INSERT INTO mentee (user_id, first_name, last_name, age, country_id, email, linkedIn, field_id) 
@@ -618,7 +585,7 @@ DELIMITER //
 CREATE PROCEDURE printOrganizations() 
 BEGIN 
 
-Select organization.* FROM organization 
+Select DISTINCT organization.* FROM organization 
 INNER JOIN mentors ON 
 organization.current_organization_id = mentors.current_organization_id;
 
@@ -634,7 +601,7 @@ DELIMITER //
 CREATE PROCEDURE printEthnicities() 
 BEGIN 
 
-Select ethnicity.* FROM ethnicity 
+Select DISTINCT ethnicity.* FROM ethnicity 
 INNER JOIN mentors 
 ON ethnicity.ethnicity_id = mentors.ethnicity_id;
 
@@ -650,7 +617,7 @@ DELIMITER //
 CREATE PROCEDURE printFields() 
 BEGIN 
 
-Select stem_field.* FROM stem_field 
+Select DISTINCT stem_field.* FROM stem_field 
 INNER JOIN mentors 
 ON stem_field.field_id = mentors.field_id;
 
@@ -667,7 +634,7 @@ DELIMITER //
 CREATE PROCEDURE printDegrees() 
 BEGIN 
 
-Select degree.* FROM degree 
+Select DISTINCT degree.* FROM degree 
 INNER JOIN mentors 
 ON degree.degree_id = mentors.degree_id;
 

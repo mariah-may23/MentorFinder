@@ -694,7 +694,7 @@ DELIMITER //
 CREATE PROCEDURE field_mentors(field INT) 
 BEGIN 
 
-Select * FROM mentors WHERE fieldID = field;
+Select * FROM mentors WHERE field_id = field;
 
 END // 
 DELIMITER ;
@@ -708,7 +708,7 @@ DELIMITER //
 CREATE PROCEDURE degree_mentors(degree INT) 
 BEGIN 
 
-Select * FROM mentors WHERE degreeID = degree;
+Select * FROM mentors WHERE degree_id = degree;
 
 END // 
 DELIMITER ;
@@ -773,6 +773,9 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS check_requests;
 
+/*
+Proedure to check request status for mentorship 
+*/
 DELIMITER //
 CREATE PROCEDURE check_requests(mentee VARCHAR(100)) 
 BEGIN 
@@ -783,3 +786,77 @@ WHERE mentee_id = mentee;
 END // 
 DELIMITER ;
 
+/*
+Procedure to find the country name based on country ID.
+*/
+DROP PROCEDURE IF EXISTS find_country_name;
+
+DELIMITER //
+CREATE PROCEDURE find_country_name(countryID INT) 
+BEGIN 
+
+Select name FROM country 
+WHERE country_id = countryID;
+ 
+END // 
+DELIMITER ;
+
+/*
+Procedure to find the ethnicity type based on ethnicity ID.
+*/
+DROP PROCEDURE IF EXISTS find_ethnicity_name;
+
+DELIMITER //
+CREATE PROCEDURE find_ethnicity_name(ethnicityID INT) 
+BEGIN 
+
+Select ethnicity_type FROM ethnicity 
+WHERE ethnicity_id = ethnicityID;
+ 
+END // 
+DELIMITER ;
+
+/*
+Procedure to find the degree name based on degree ID.
+*/
+DROP PROCEDURE IF EXISTS find_degree_name;
+
+DELIMITER //
+CREATE PROCEDURE find_degree_name(degreeID INT) 
+BEGIN 
+
+Select name FROM degree 
+WHERE degree_id = degreeID;
+ 
+END // 
+DELIMITER ;
+
+/*
+Procedure to find the field name based on field ID.
+*/
+DROP PROCEDURE IF EXISTS find_field_name;
+
+DELIMITER //
+CREATE PROCEDURE find_field_name(fieldID INT) 
+BEGIN 
+
+Select field_name FROM stem_field 
+WHERE field_id = fieldID;
+ 
+END // 
+DELIMITER ;
+
+/*
+Procedure to find the organization name based on organization ID.
+*/
+DROP PROCEDURE IF EXISTS find_org_name;
+
+DELIMITER //
+CREATE PROCEDURE find_org_name(orgID INT) 
+BEGIN 
+
+Select name FROM organization 
+WHERE current_organization_id = orgID;
+ 
+END // 
+DELIMITER ;

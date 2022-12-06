@@ -201,7 +201,8 @@ public class MentorFinder {
         }
         // make change in the status table to approved ->
         change_status_approved(con, approve_reqs, mentor);
-        System.out.println();
+
+        //System.out.println();
 
         //delete_req_from_pending(con, approve_reqs, mentor);
       }
@@ -227,9 +228,9 @@ public class MentorFinder {
           break;
         }
         // make change in the status table to approved ->
-        change_status_declined(con, approve_reqs, mentor);
+        change_status_declined(con, decline_reqs, mentor);
 
-        delete_req_from_pending(con, approve_reqs, mentor);
+        //delete_req_from_pending(con, approve_reqs, mentor);
       }
       catch (NumberFormatException e) {
         System.out.println("Invalid Input. Try again");
@@ -501,7 +502,7 @@ public class MentorFinder {
     ResultSet rs = st.executeQuery(command);
 
     while (rs.next()) {
-      String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s %-20s",
+      String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s",
               rs.getString(1),
               rs.getString(2),
               rs.getString(3),
@@ -511,8 +512,8 @@ public class MentorFinder {
               rs.getInt(7),
               rs.getInt(8),
               rs.getInt(9),
-              rs.getString(10),
-              rs.getString(11)
+              rs.getString(10)
+             // rs.getString(11)
 
       );
       String[] words = out.split(" ");
@@ -542,7 +543,7 @@ public class MentorFinder {
     ResultSet rs = st.executeQuery(command);
 
     while (rs.next()) {
-      String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s %-20s",
+      String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s",
               rs.getString(1),
               rs.getString(2),
               rs.getString(3),
@@ -552,8 +553,8 @@ public class MentorFinder {
               rs.getInt(7),
               rs.getInt(8),
               rs.getInt(9),
-              rs.getString(10),
-              rs.getString(11)
+              rs.getString(10)
+             // rs.getString(11)
       );
       String[] words = out.split(" ");
 
@@ -581,7 +582,7 @@ public class MentorFinder {
     ResultSet rs = st.executeQuery(command);
 
     while (rs.next()) {
-      String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s %-20s",
+      String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s",
               rs.getString(1),
               rs.getString(2),
               rs.getString(3),
@@ -591,8 +592,8 @@ public class MentorFinder {
               rs.getInt(7),
               rs.getInt(8),
               rs.getInt(9),
-              rs.getString(10),
-              rs.getString(11)
+              rs.getString(10)
+             // rs.getString(11)
       );
       String[] words = out.split(" ");
 
@@ -620,7 +621,7 @@ public class MentorFinder {
     ResultSet rs = st.executeQuery(command);
 
     while (rs.next()) {
-      String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s %-20s",
+      String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s",
               rs.getString(1),
               rs.getString(2),
               rs.getString(3),
@@ -630,8 +631,8 @@ public class MentorFinder {
               rs.getInt(7),
               rs.getInt(8),
               rs.getInt(9),
-              rs.getString(10),
-              rs.getString(11)
+              rs.getString(10)
+             // rs.getString(11)
       );
       String[] words = out.split(" ");
 
@@ -658,7 +659,7 @@ public class MentorFinder {
     ResultSet rs = st.executeQuery(command);
 
     while (rs.next()) {
-      String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s %-20s",
+      String out = String.format("%-20s %-20s %-20s %-20d %-20d %-20s %-20d %-20d %-20d %-20s",
               rs.getString(1),
               rs.getString(2),
               rs.getString(3),
@@ -668,8 +669,8 @@ public class MentorFinder {
               rs.getInt(7),
               rs.getInt(8),
               rs.getInt(9),
-              rs.getString(10),
-              rs.getString(11)
+              rs.getString(10)
+              //rs.getString(11)
       );
       String[] words = out.split(" ");
 

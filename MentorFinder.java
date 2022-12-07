@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -72,6 +73,8 @@ public class MentorFinder {
     // select statement for showing
     Statement stmt = null;
     ResultSet rs = null;
+
+    System.out.println("CURRENT MENTEES:");
 
     // Retrieve list of mentees under the mentor
     try {
@@ -219,6 +222,7 @@ public class MentorFinder {
       stmt = con.createStatement();
       rs = stmt.executeQuery(sql);
       //System.out.println(rs.next());
+
       while (rs.next()) {
         flag = 1;
         String print = String.format("%-20s  %-20s %-20s",
@@ -249,78 +253,93 @@ public class MentorFinder {
    * @throws SQLException the sql exception
    */
   public void show_requests(Connection con, String mentor) throws SQLException {
-
-    int reqs_present = check_reqs(con, mentor);
+    System.out.println("\nCURRENT REQUESTS:");
+    int reqs_present = check_reqs(con, mentor); //prints the requests available
     if (reqs_present == 1) {
 
-      int approve_reqs = 0;
-
-      while (approve_reqs != -1) {
+    boolean quit = false;
+      while (!quit) {
         // give option to accept or decline
-        System.out.println("Please type the request IDs you want to ACCEPT." +
-                "\nType -1 to stop.");
-        String approve = sc.nextLine();
 
-        try {
-          approve_reqs = Integer.parseInt(approve);
-          if (approve_reqs == -1) {
-            break;
-          }
-          // make change in the status table to approved ->
-          change_status_approved(con, approve_reqs, mentor);
-          //delete_req_from_pending(con, approve_reqs, mentor);
-        } catch (NumberFormatException e) {
-          System.out.println("Invalid Input. Try again");
-          continue;
+        System.out.println("\nType ACCEPT to begin accepting" +
+                "\nType DECLINE to begin declining" +
+                "\nType BACK to stop.");
+        String choice = sc.nextLine();
+
+        //check to see if user would like to go back to the loop
+        if (choice.equalsIgnoreCase("BACK")) {
+          break;
         }
+        else if (choice.equalsIgnoreCase("ACCEPT")) {
+          System.out.println("Please type the request ID that you would like to approve. Type BACK to go back.");
+          while(true) {
 
-        reqs_present = check_reqs(con, mentor);
-        if (reqs_present == -1) {
-          System.out.println("No Pending Requests!");
+            String approve = sc.nextLine();
+            if(approve.equalsIgnoreCase("back")) {
+              System.out.println("\nCURRENT REQUESTS");
+              reqs_present = check_reqs(con, mentor);
+              break;
+            }
+            int approve_reqs = Integer.parseInt(approve);
+
+
+            // make change in the status table to approved ->
+            change_status_approved(con, approve_reqs, mentor);
+
+
+            reqs_present = check_reqs(con, mentor);
+
+            if (reqs_present == -1) {
+              quit = true;
+              break;
+            }
+            System.out.println("Would you like to accept another request?" +
+                    "Enter the ID or type BACK to go back");
+
+
+          }
+        }
+        else if (choice.equalsIgnoreCase("DECLINE")) {
+          System.out.println("Please type the request ID that you would like to decline. " +
+                  "Type BACK to go back.");
+          while(true) {
+            String decline = sc.nextLine();
+            if(decline.equalsIgnoreCase("back")) {
+              System.out.println("\nCURRENT REQUESTS");
+              reqs_present = check_reqs(con, mentor);
+              break;
+            }
+            int decline_reqs = Integer.parseInt(decline);
+
+            // make change in the status table to approved ->
+            change_status_declined(con, decline_reqs, mentor);
+
+            reqs_present = check_reqs(con, mentor);
+            if (reqs_present == -1) {
+              quit = true;
+              break;
+            }
+            System.out.println("Would you like to accept another request?" +
+                    " Enter the ID or type BACK to go back");
+
+
+
+
+          }
+        }
+        else {
+          System.out.println("Sorry, that is not a valid choice. " +
+                  "Please enter a valid choice.");
           break;
         }
 
       }
-
-
-      reqs_present = check_reqs(con, mentor);
-      if (reqs_present == 1) {
-
-        int decline_reqs = 0;
-        while (decline_reqs != -1) {
-          System.out.println("Please type the request IDs you want to DECLINE." +
-                  "\nType -1 to stop.");
-
-          String decline = sc.nextLine();
-
-          try {
-            decline_reqs = Integer.parseInt(decline);
-            if (decline_reqs == -1) {
-              break;
-            }
-            // make change in the status table to approved ->
-            change_status_declined(con, decline_reqs, mentor);
-
-            //delete_req_from_pending(con, approve_reqs, mentor);
-          } catch (NumberFormatException e) {
-            System.out.println("Invalid Input. Try again");
-            continue;
-          }
-          reqs_present = check_reqs(con, mentor);
-          if (reqs_present == -1) {
-            System.out.println("No Pending Requests!");
-            break;
-          }
-        }
-      } else {
-        System.out.println("No Pending Requests!");
-
-      }
-    } else {
-      System.out.println("No Pending Requests!");
     }
-
+    if (reqs_present == -1) {
+      System.out.println("Request box is empty.");
+    }
   }
+
 
   /**
    * Mentor is registered boolean.
@@ -356,29 +375,35 @@ public class MentorFinder {
     boolean registered = mentor_is_registered(con, mentor);
 
     if (!registered) {
-      System.out.println("Looks like you are not a registered user!" +
-              " Exiting from system.");
-    } else {
-      System.out.println("Select the wanted search from the given list of options below- ");
-      System.out.println("A : Show current mentees. \nB : Show mentorship requests \nQ: Quit ");
+      System.out.println("Looks like you are not a registered user!");
+      return;
+    }
+
+      //infinite while loop to keep options appearing unless quits
+    while(true){
+      System.out.println("\nSelect the wanted search from the given list of options below- ");
+      System.out.println("A : Show current mentees. \nB : Show mentorship requests \nC: Logout ");
 
       boolean invalid_input = true;
       String option = sc.nextLine();
 
       while (!option.equalsIgnoreCase("a") && !option.equalsIgnoreCase("b")
-              && !option.equalsIgnoreCase("q")) {
+              && !option.equalsIgnoreCase("c")) {
         System.out.println("Invalid input! Enter again." +
-                "\nA : Show current mentees. \nB : Show mentorship requests \nQ: Quit ");
+                "\nA : Show current mentees. \nB : Show mentorship requests \nC: Logout ");
         option = sc.nextLine();
       }
-
 
       if (option.equalsIgnoreCase("A")) {
         this.show_current_mentees(con, mentor);
       } else if (option.equalsIgnoreCase("B")) {
         this.show_requests(con, mentor);
-      } else if (option.equalsIgnoreCase("Q")) {
-        // quits
+      } else if (option.equalsIgnoreCase("C")) {
+        System.out.println("Are you sure you would like to log out? Enter YES or NO");
+        String confirm = sc.nextLine();
+        if (confirm.equalsIgnoreCase("YES")) {
+          break;
+        }
       }
     }
   }
@@ -755,7 +780,7 @@ public class MentorFinder {
 
       int get_org = rs.getInt(9);
       String org = find_org_name(conn, get_org);
-      //System.out.println(org);
+
 
       String out = String.format("%-20s %-20s %-20s %-20s %-20s %-20s %-20s %-20s %-20s %-20s",
               rs.getString(1),
@@ -776,6 +801,8 @@ public class MentorFinder {
       org_mentors_ids.add(words[0]);
       System.out.println(out);
     }
+
+
     System.out.println("Which mentor would you like to message? Please enter their userID.");
     //Scanner sc = new Scanner(System.in);
     String mentor = sc.nextLine();
